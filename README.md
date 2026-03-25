@@ -1,35 +1,37 @@
+https://creteeee.github.io/BoostEffectFontGenerator/
+
 # BoostEffectFontGenerator
 
-这是一个 **STG Boost（spacetypegenerator.com/boost）本地复刻版**：UI、参数面板、3D 字形挤出与动画逻辑均来自你下载的 `STG _v.Boost.html` / `STG _v.Boost_files/*`（已迁移到本仓库）。
+This project is a **local replica of STG Boost** (`spacetypegenerator.com/boost`). The UI, parameter panel, 3D glyph extrusion, and animation logic all come from the files you downloaded: `STG _v.Boost.html` / `STG _v.Boost_files/*` (migrated into this repository).
 
-> 说明：你下载包里**不包含**原站的 `boost_resources/`（字体与 transparency 背景图），因此要做到“视觉完全一致”，需要你把这些资源补齐到本仓库的 `boost_resources/` 目录（见 `boost_resources/README.md`）。
+> Note: Your downloaded package **does not include** the original site's `boost_resources/` (fonts and the `transparency` background image). To match the visuals 1:1, you need to add those resources into this repo's `boost_resources/` folder (see `boost_resources/README.md`).
 
-## 本地预览
+## Local preview
 
-静态站点，需要起本地 HTTP 服务（否则部分浏览器对 `loadFont` 有限制）：
+This is a static site, so you should run a local HTTP server (some browsers restrict `loadFont` when opened via `file://`):
 
 ```bash
-# 示例：在项目根目录
+# Example (from the project root)
 npx --yes serve .
 ```
 
-浏览器打开提示的地址即可。
+Open the printed URL in your browser.
 
 ## GitHub Pages
 
-1. 仓库 **Settings → Pages**：Source 选部署分支（如 `main`），文件夹选 **`/`（root）**。
-2. 站点根路径为 `https://<用户名>.github.io/<仓库名>/`，本项目全部使用**相对路径**，无需改代码。
+1. In the repo go to **Settings → Pages**: set **Source** to your deployment branch (e.g. `main`), and select **`/` (root)** as the folder.
+2. Your site root will be `https://<username>.github.io/<repo>/`. This project uses **relative paths** everywhere, so no code changes are needed.
 
-## 字体放哪里、怎么换（原版复刻路径）
+## Where to put fonts / how to change fonts (original replica layout)
 
-- **资源目录**：`boost_resources/`
-- **放置方式**：把字体文件（`.ttf`/`.otf`）与 `transparency.png` 放入 `boost_resources/`，文件名需要与原版一致
-- **列表位置**：原版字体加载逻辑写死在 `js/boost/sketch_boost.js` 的 `preload()` 里（`tFont[...] = loadFont("boost_resources/xxx.ttf")`）
+- **Assets folder**: `boost_resources/`
+- **How to add**: put font files (`.ttf` / `.otf`) and `transparency.png` into `boost_resources/`. File names must match the original ones.
+- **Where the list is defined**: the original font loading logic is hardcoded in `preload()` inside `js/boost/sketch_boost.js` (e.g. `tFont[...] = loadFont("boost_resources/xxx.ttf")`).
 
-## 代码入口
+## Code entry points
 
-- **页面**：`index.html`
-- **样式**：`css/style.css`
-- **原版脚本（本地）**：`js/boost/*`
-- **外部依赖（CDN）**：p5 / opentype / jquery / jquery-ui / h264 encoder（在 `index.html` 里引入）
+- **Page**: `index.html`
+- **Styles**: `css/style.css`
+- **Original scripts (local)**: `js/boost/*`
+- **External dependencies (CDN)**: p5 / opentype / jquery / jquery-ui / h264 encoder (included in `index.html`)
 

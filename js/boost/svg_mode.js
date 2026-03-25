@@ -3,7 +3,7 @@
 
 var renderMode = 0; // 0 = TTF, 1 = SVG Logo
 var logoKerning = 0; // 相邻字符额外 x 间距（渲染后像素单位）
-var logoFillColors = ["#FD0000", "#0061DF", "#F5BC37"]; // 三个 logo 各自填充色（默认取 SVG 原色）
+var logoFillColors = ["#0061DF", "#FD0000", "#F5BC37"]; // 三个 logo 各自填充色（默认取 SVG 原色）
 var logoC1FrontOffset = 20; // C1 额外朝向观众的 Z 偏移（避免与两侧穿插）
 
 var logoPathDs = [];
@@ -497,66 +497,94 @@ SvgTumbleLet = class SvgTumbleLet {
     pop();
   }
 
+  getExtrudeSegments() {
+    if (!layerOnToggle || !layerCount || layerCount < 2 || layerGap <= 0) {
+      return [{ z0: 0, z1: this.dAct }];
+    }
+
+    const depth = this.dAct;
+    const gapSigned = depth < 0 ? -abs(layerGap) : abs(layerGap);
+    const totalGap = gapSigned * (layerCount - 1);
+    const segDepth = (depth - totalGap) / layerCount;
+
+    if (segDepth === 0 || (depth < 0 && segDepth > 0) || (depth > 0 && segDepth < 0)) {
+      return [{ z0: 0, z1: depth }];
+    }
+
+    const segs = [];
+    for (let i = 0; i < layerCount; i++) {
+      const z0 = i * (segDepth + gapSigned);
+      segs.push({ z0, z1: z0 + segDepth });
+    }
+    return segs;
+  }
+
   displayShape() {
-    const strokeRepeats = 2; // 模拟前/后面
+    const strokeRepeats = 2; // 模拟描边/填充逻辑
     const cmds = this.commands;
 
-    for (let m = 0; m < strokeRepeats; m++) {
-      push();
-      translate(0, 0, m * this.dAct);
+    const segs = this.getExtrudeSegments();
+    for (let s = 0; s < segs.length; s++) {
+      this.drawCapAtZ(segs[s].z0, cmds, strokeRepeats);
+      this.drawCapAtZ(segs[s].z1, cmds, strokeRepeats);
+    }
+  }
 
-      for (let r = 0; r < strokeRepeats; r++) {
-        if (strokeOnToggle) {
-          if (r == 0) {
-            strokeWeight(strokeW);
-            stroke(strokeColor);
-            noFill();
-          } else {
-            translate(0, 0, -0.5);
-            noStroke();
-            if (capsOnToggle) fill(logoFillColors[this.index] || textColor);
-            else noFill();
-          }
+  drawCapAtZ(z, cmds, strokeRepeats) {
+    push();
+    translate(0, 0, z);
+
+    for (let r = 0; r < strokeRepeats; r++) {
+      if (strokeOnToggle) {
+        if (r == 0) {
+          strokeWeight(strokeW);
+          stroke(strokeColor);
+          noFill();
         } else {
+          translate(0, 0, -0.5);
           noStroke();
           if (capsOnToggle) fill(logoFillColors[this.index] || textColor);
           else noFill();
         }
+      } else {
+        noStroke();
+        if (capsOnToggle) fill(logoFillColors[this.index] || textColor);
+        else noFill();
+      }
 
-        let closePoint = 0;
-        var openContour = false;
-        for (let i = 0; i < cmds.length; i++) {
-          if (cmds[i].type == "M") {
-            if (i > 0) {
-              beginContour();
-              openContour = true;
-            } else {
-              beginShape(TESS);
-            }
-            vertex(cmds[i].x, cmds[i].y);
+      let closePoint = 0;
+      var openContour = false;
+      for (let i = 0; i < cmds.length; i++) {
+        if (cmds[i].type == "M") {
+          if (i > 0) {
+            beginContour();
+            openContour = true;
+          } else {
+            beginShape(TESS);
           }
+          vertex(cmds[i].x, cmds[i].y);
+        }
 
-          if (cmds[i].type == "Z") {
-            if (openContour) endContour();
-            if (cmds.length - 1 === i) endShape(CLOSE);
-            point(cmds[closePoint].x, cmds[closePoint].y);
-            closePoint = i + 1;
-          }
+        if (cmds[i].type == "Z") {
+          if (openContour) endContour();
+          if (cmds.length - 1 === i) endShape(CLOSE);
+          point(cmds[closePoint].x, cmds[closePoint].y);
+          closePoint = i + 1;
+        }
 
-          if (cmds[i].type == "L") vertex(cmds[i].x, cmds[i].y);
+        if (cmds[i].type == "L") vertex(cmds[i].x, cmds[i].y);
 
-          if (cmds[i].type == "Q") {
-            quadraticVertex(cmds[i].x1, cmds[i].y1, cmds[i].x, cmds[i].y);
-          }
+        if (cmds[i].type == "Q") {
+          quadraticVertex(cmds[i].x1, cmds[i].y1, cmds[i].x, cmds[i].y);
+        }
 
-          if (cmds[i].type == "C") {
-            bezierVertex(cmds[i].x1, cmds[i].y1, cmds[i].x2, cmds[i].y2, cmds[i].x, cmds[i].y);
-            vertex(cmds[i].x, cmds[i].y);
-          }
+        if (cmds[i].type == "C") {
+          bezierVertex(cmds[i].x1, cmds[i].y1, cmds[i].x2, cmds[i].y2, cmds[i].x, cmds[i].y);
+          vertex(cmds[i].x, cmds[i].y);
         }
       }
-      pop();
     }
+    pop();
   }
 
   displayExtrudePatch() {
@@ -566,55 +594,60 @@ SvgTumbleLet = class SvgTumbleLet {
     noStroke();
 
     const cmds = this.commands;
-    let closePoint = 0;
+    const segs = this.getExtrudeSegments();
+    for (let si = 0; si < segs.length; si++) {
+      const z0 = segs[si].z0;
+      const z1 = segs[si].z1;
+      let closePoint = 0;
 
-    for (let i = 0; i < cmds.length; i++) {
-      if (sidesType == 2) fill(colorSet[this.cols[i]]);
+      for (let i = 0; i < cmds.length; i++) {
+        if (sidesType == 2) fill(colorSet[this.cols[i]]);
 
-      if (cmds[i].type == "Z") {
-        beginShape(TRIANGLE_STRIP);
-        vertex(cmds[i - 1].x, cmds[i - 1].y, 0);
-        vertex(cmds[i - 1].x, cmds[i - 1].y, this.dAct);
+        if (cmds[i].type == "Z") {
+          beginShape(TRIANGLE_STRIP);
+          vertex(cmds[i - 1].x, cmds[i - 1].y, z0);
+          vertex(cmds[i - 1].x, cmds[i - 1].y, z1);
 
-        vertex(cmds[closePoint].x, cmds[closePoint].y, 0);
-        vertex(cmds[closePoint].x, cmds[closePoint].y, this.dAct);
-        endShape();
+          vertex(cmds[closePoint].x, cmds[closePoint].y, z0);
+          vertex(cmds[closePoint].x, cmds[closePoint].y, z1);
+          endShape();
 
-        closePoint = i + 1;
-      }
-
-      if (cmds[i].type == "L") {
-        beginShape(TRIANGLE_STRIP);
-        vertex(cmds[i - 1].x, cmds[i - 1].y, 0);
-        vertex(cmds[i - 1].x, cmds[i - 1].y, this.dAct);
-
-        vertex(cmds[i].x, cmds[i].y, 0);
-        vertex(cmds[i].x, cmds[i].y, this.dAct);
-        endShape();
-      }
-
-      if (cmds[i].type == "Q") {
-        beginShape(TRIANGLE_STRIP);
-        for (let r = 0; r < res; r++) {
-          const thisT = r / (res - 1);
-          const thisX = quadLerp(cmds[i - 1].x, cmds[i].x1, cmds[i].x, thisT);
-          const thisY = quadLerp(cmds[i - 1].y, cmds[i].y1, cmds[i].y, thisT);
-          vertex(thisX, thisY, 0);
-          vertex(thisX, thisY, this.dAct);
+          closePoint = i + 1;
         }
-        endShape();
-      }
 
-      if (cmds[i].type == "C") {
-        beginShape(TRIANGLE_STRIP);
-        for (let r = 0; r < res; r++) {
-          const thisT = r / (res - 1);
-          const thisX = bezierPoint(cmds[i - 1].x, cmds[i].x1, cmds[i].x2, cmds[i].x, thisT);
-          const thisY = bezierPoint(cmds[i - 1].y, cmds[i].y1, cmds[i].y2, cmds[i].y, thisT);
-          vertex(thisX, thisY, 0);
-          vertex(thisX, thisY, this.dAct);
+        if (cmds[i].type == "L") {
+          beginShape(TRIANGLE_STRIP);
+          vertex(cmds[i - 1].x, cmds[i - 1].y, z0);
+          vertex(cmds[i - 1].x, cmds[i - 1].y, z1);
+
+          vertex(cmds[i].x, cmds[i].y, z0);
+          vertex(cmds[i].x, cmds[i].y, z1);
+          endShape();
         }
-        endShape();
+
+        if (cmds[i].type == "Q") {
+          beginShape(TRIANGLE_STRIP);
+          for (let r = 0; r < res; r++) {
+            const thisT = r / (res - 1);
+            const thisX = quadLerp(cmds[i - 1].x, cmds[i].x1, cmds[i].x, thisT);
+            const thisY = quadLerp(cmds[i - 1].y, cmds[i].y1, cmds[i].y, thisT);
+            vertex(thisX, thisY, z0);
+            vertex(thisX, thisY, z1);
+          }
+          endShape();
+        }
+
+        if (cmds[i].type == "C") {
+          beginShape(TRIANGLE_STRIP);
+          for (let r = 0; r < res; r++) {
+            const thisT = r / (res - 1);
+            const thisX = bezierPoint(cmds[i - 1].x, cmds[i].x1, cmds[i].x2, cmds[i].x, thisT);
+            const thisY = bezierPoint(cmds[i - 1].y, cmds[i].y1, cmds[i].y2, cmds[i].y, thisT);
+            vertex(thisX, thisY, z0);
+            vertex(thisX, thisY, z1);
+          }
+          endShape();
+        }
       }
     }
   }
@@ -626,10 +659,14 @@ SvgTumbleLet = class SvgTumbleLet {
     noFill();
     stroke(strokeColor);
     strokeWeight(strokeW);
-
-    for (let i = 0; i < cmds.length; i++) {
-      if (cmds[i].type != "Z") {
-        line(cmds[i].x, cmds[i].y, 0, cmds[i].x, cmds[i].y, this.dAct);
+    const segs = this.getExtrudeSegments();
+    for (let si = 0; si < segs.length; si++) {
+      const z0 = segs[si].z0;
+      const z1 = segs[si].z1;
+      for (let i = 0; i < cmds.length; i++) {
+        if (cmds[i].type != "Z") {
+          line(cmds[i].x, cmds[i].y, z0, cmds[i].x, cmds[i].y, z1);
+        }
       }
     }
     pop();

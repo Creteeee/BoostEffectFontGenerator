@@ -67,6 +67,12 @@ var alignMode = 1;
 
 let enableOrbit = true;
 
+// Extrude Layers（分层挤出）
+var layerOnToggle = false;
+// 默认 gap = 0.2（按 UI 映射 0..100 -> 0..120px，因此 0.2*120=24px，对应 slider value=20）
+var layerGap = 24; // 像素单位（沿挤出方向的间隔）
+var layerCount = 3;
+
 var saveMode = 0;
 var recording = false;
 

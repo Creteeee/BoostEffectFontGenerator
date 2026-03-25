@@ -241,6 +241,17 @@ function setStrokeWeight(val){
   strokeW = map(val, 0, 100, 0, 10);
 }
 
+function setLayerOn(){
+  layerOnToggle = !layerOnToggle;
+  const opt = document.getElementById("layerOptions");
+  if(opt) opt.style.display = layerOnToggle ? "block" : "none";
+}
+
+function setLayerGap(val){
+  // 0..100 -> 0..120 px
+  layerGap = map(val, 0, 100, 0, 120);
+}
+
 function setForeColor(val){
   foreColor = color(val);
 

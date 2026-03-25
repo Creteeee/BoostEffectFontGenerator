@@ -97,7 +97,7 @@
             <div class="coupling1">
               <div class="coupling_label"><h3>Mode</h3></div>
               <select name="renderMode" id="renderModeSelect" onchange="setRenderMode(this.value)">
-                <option value="0" selected="selected">TTF 文字</option>
+                <option value="0" selected="selected">TTF Mode</option>
                 <option value="1">Logo SVG</option>
               </select>
             </div>
@@ -149,11 +149,11 @@
               </div>
               <div class="coupling1">
                 <div class="coupling_label"><h3>C1</h3></div>
-                <input type="color" value="#FD0000" oninput="setLogoFillColor(0,this.value)" />
+                <input type="color" value="#0061DF" oninput="setLogoFillColor(0,this.value)" />
               </div>
               <div class="coupling1">
                 <div class="coupling_label"><h3>C2</h3></div>
-                <input type="color" value="#0061DF" oninput="setLogoFillColor(1,this.value)" />
+                <input type="color" value="#FD0000" oninput="setLogoFillColor(1,this.value)" />
               </div>
               <div class="coupling1">
                 <div class="coupling_label"><h3>C3</h3></div>
@@ -341,6 +341,25 @@
               <option value="1" selected="selected">Zoom</option>
               <option value="2">Punch</option>
             </select>
+
+            <div class="coupling1" style="margin-top:5px">
+              <label class="coupling2_label" for="layerOn">Layers (3)</label>
+              <input type="checkbox" id="layerOn" name="layerOn" onclick="setLayerOn()" />
+            </div>
+            <div id="layerOptions" style="display:none">
+              <div class="coupling1">
+                <div class="coupling_label"><h3>Gap</h3></div>
+                <input
+                  type="range"
+                  class="ranger"
+                  min="0"
+                  max="100"
+                  value="20"
+                  id="layerGap"
+                  oninput="setLayerGap(this.value)"
+                />
+              </div>
+            </div>
 
             <div id="tumbleSet">
               <div class="coupling1">

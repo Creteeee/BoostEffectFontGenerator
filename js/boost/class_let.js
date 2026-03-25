@@ -232,34 +232,53 @@ class TumbleLet {
   }
 
   displayShape(){
-    // var strokeRepeats = 1;
-
-    // if(strokeOnToggle){
     var strokeRepeats = 2;
-    // }
 
-    for(var m = 0; m < strokeRepeats; m ++){        ////// DISPLAY 0: FRONT AND 1: BACK
-      push();
-        translate(0, 0, m * this.dAct);
+    const segs = this.getExtrudeSegments();
+    for (let s = 0; s < segs.length; s++) {
+      this.drawCapAtZ(segs[s].z0, strokeRepeats);
+      this.drawCapAtZ(segs[s].z1, strokeRepeats);
+    }
+  }
 
-        for(var r = 0; r < strokeRepeats; r ++){     ////// DISPLAY 0: FILL AND 1: STROKE
-          var openContour = false;
+  getExtrudeSegments(){
+    // 默认：一整段 0 -> dAct
+    if(!layerOnToggle || !layerCount || layerCount < 2 || layerGap <= 0){
+      return [{ z0: 0, z1: this.dAct }];
+    }
 
-          if(strokeOnToggle){
-            if(r == 0){
-              strokeWeight(strokeW);
-              stroke(strokeColor);
-              noFill();
-            } else {
-              translate(0, 0, -0.5);
-              noStroke();
-              if(capsOnToggle){
-                fill(textColor);
-              } else {
-                noFill();
-              }
-            }
+    const depth = this.dAct;
+    const gapSigned = depth < 0 ? -abs(layerGap) : abs(layerGap);
+    const totalGap = gapSigned * (layerCount - 1);
+    const segDepth = (depth - totalGap) / layerCount;
+
+    // gap 太大导致 segDepth 反向/接近 0：回退单段
+    if(segDepth === 0 || (depth < 0 && segDepth > 0) || (depth > 0 && segDepth < 0)){
+      return [{ z0: 0, z1: depth }];
+    }
+
+    const segs = [];
+    for(let i = 0; i < layerCount; i++){
+      const z0 = i * (segDepth + gapSigned);
+      segs.push({ z0, z1: z0 + segDepth });
+    }
+    return segs;
+  }
+
+  drawCapAtZ(z, strokeRepeats){
+    push();
+      translate(0, 0, z);
+
+      for(var r = 0; r < strokeRepeats; r ++){
+        var openContour = false;
+
+        if(strokeOnToggle){
+          if(r == 0){
+            strokeWeight(strokeW);
+            stroke(strokeColor);
+            noFill();
           } else {
+            translate(0, 0, -0.5);
             noStroke();
             if(capsOnToggle){
               fill(textColor);
@@ -267,61 +286,68 @@ class TumbleLet {
               noFill();
             }
           }
-
-          var closePoint = 0;
-          for (i = 0; i < this.p.commands.length; i++) {
-            if (this.p.commands[i].type == "M") {
-              if(i > 0){
-                beginContour();
-                openContour = true;
-              } else {
-                beginShape(TESS);
-              }
-              vertex(this.p.commands[i].x, this.p.commands[i].y);
-            }
-        
-            if (this.p.commands[i].type == "Z") {
-              if(openContour){
-                endContour();
-              }
-              if(i == this.p.commands.length - 1){
-                endShape(CLOSE);
-              }
-              point(this.p.commands[closePoint].x, this.p.commands[closePoint].y);
-              closePoint = i + 1;
-            }
-        
-            if (this.p.commands[i].type == "L") {
-              vertex(this.p.commands[i].x, this.p.commands[i].y);
-            }
-
-            if (this.p.commands[i].type == "Q") {
-              quadraticVertex(
-                this.p.commands[i].x1,
-                this.p.commands[i].y1,
-                this.p.commands[i].x,
-                this.p.commands[i].y
-              );
-            }
-
-            if (this.p.commands[i].type == "C") {
-              bezierVertex(
-                this.p.commands[i].x1,
-                this.p.commands[i].y1,
-                this.p.commands[i].x2,
-                this.p.commands[i].y2,
-                this.p.commands[i].x,
-                this.p.commands[i].y
-              );
-              vertex(
-                this.p.commands[i].x,
-                this.p.commands[i].y
-              );
-            }
+        } else {
+          noStroke();
+          if(capsOnToggle){
+            fill(textColor);
+          } else {
+            noFill();
           }
         }
-      pop();
-    }
+
+        var closePoint = 0;
+        for (i = 0; i < this.p.commands.length; i++) {
+          if (this.p.commands[i].type == "M") {
+            if(i > 0){
+              beginContour();
+              openContour = true;
+            } else {
+              beginShape(TESS);
+            }
+            vertex(this.p.commands[i].x, this.p.commands[i].y);
+          }
+      
+          if (this.p.commands[i].type == "Z") {
+            if(openContour){
+              endContour();
+            }
+            if(i == this.p.commands.length - 1){
+              endShape(CLOSE);
+            }
+            point(this.p.commands[closePoint].x, this.p.commands[closePoint].y);
+            closePoint = i + 1;
+          }
+      
+          if (this.p.commands[i].type == "L") {
+            vertex(this.p.commands[i].x, this.p.commands[i].y);
+          }
+
+          if (this.p.commands[i].type == "Q") {
+            quadraticVertex(
+              this.p.commands[i].x1,
+              this.p.commands[i].y1,
+              this.p.commands[i].x,
+              this.p.commands[i].y
+            );
+          }
+
+          if (this.p.commands[i].type == "C") {
+            bezierVertex(
+              this.p.commands[i].x1,
+              this.p.commands[i].y1,
+              this.p.commands[i].x2,
+              this.p.commands[i].y2,
+              this.p.commands[i].x,
+              this.p.commands[i].y
+            );
+            vertex(
+              this.p.commands[i].x,
+              this.p.commands[i].y
+            );
+          }
+        }
+      }
+    pop();
   }
 
   displayExtrudePatch(){
@@ -330,64 +356,65 @@ class TumbleLet {
     }
     noStroke();
 
-    var closePoint = 0;
-    var z = 0;
-    for (i = 0; i < this.p.commands.length; i++) {
-      if(sidesType == 2){
-        fill(colorSet[this.cols[i]]);
+    const segs = this.getExtrudeSegments();
+    for(let si = 0; si < segs.length; si++){
+      const z0 = segs[si].z0;
+      const z1 = segs[si].z1;
+
+      var closePoint = 0;
+      for (i = 0; i < this.p.commands.length; i++) {
+        if(sidesType == 2){
+          fill(colorSet[this.cols[i]]);
+        }
+
+        if (this.p.commands[i].type == "Z") {
+          beginShape(TRIANGLE_STRIP);
+            vertex(this.p.commands[i - 1].x, this.p.commands[i - 1].y, z0);
+            vertex(this.p.commands[i - 1].x, this.p.commands[i - 1].y, z1);
+
+            vertex(this.p.commands[closePoint].x, this.p.commands[closePoint].y, z0);
+            vertex(this.p.commands[closePoint].x, this.p.commands[closePoint].y, z1);
+          endShape();
+
+          closePoint = i + 1;
+        }
+    
+        if (this.p.commands[i].type == "L") {
+          beginShape(TRIANGLE_STRIP);
+            vertex(this.p.commands[i - 1].x, this.p.commands[i - 1].y, z0);
+            vertex(this.p.commands[i - 1].x, this.p.commands[i - 1].y, z1);
+
+            vertex(this.p.commands[i].x, this.p.commands[i].y, z0);
+            vertex(this.p.commands[i].x, this.p.commands[i].y, z1);
+          endShape();
+        }
+        
+        if (this.p.commands[i].type == "Q") {
+          beginShape(TRIANGLE_STRIP);
+            for(var r = 0; r < res; r++){
+              var thisT = r/(res - 1);
+              var thisX = quadLerp(this.p.commands[i - 1].x, this.p.commands[i].x1, this.p.commands[i].x, thisT);
+              var thisY = quadLerp(this.p.commands[i - 1].y, this.p.commands[i].y1, this.p.commands[i].y, thisT);
+
+              vertex(thisX, thisY, z0);
+              vertex(thisX, thisY, z1);
+            }
+          endShape();
+        }
+
+        if (this.p.commands[i].type == "C") {
+          beginShape(TRIANGLE_STRIP);
+            for(var r = 0; r < res; r++){
+              var thisT = r/(res - 1);
+              var thisX = bezierPoint(this.p.commands[i - 1].x, this.p.commands[i].x1, this.p.commands[i].x2, this.p.commands[i].x, thisT);
+              var thisY = bezierPoint(this.p.commands[i - 1].y, this.p.commands[i].y1, this.p.commands[i].y2, this.p.commands[i].y, thisT);
+
+              vertex(thisX, thisY, z0);
+              vertex(thisX, thisY, z1);
+            }
+          endShape();
+        }
       }
-
-      if (this.p.commands[i].type == "M") {
-      }
-  
-      if (this.p.commands[i].type == "Z") {
-        beginShape(TRIANGLE_STRIP);
-          vertex(this.p.commands[i - 1].x, this.p.commands[i - 1].y, 0);
-          vertex(this.p.commands[i - 1].x, this.p.commands[i - 1].y, this.dAct);
-
-          vertex(this.p.commands[closePoint].x, this.p.commands[closePoint].y, 0);
-          vertex(this.p.commands[closePoint].x, this.p.commands[closePoint].y, this.dAct);
-        endShape();
-
-        closePoint = i + 1;
-      }
-  
-      if (this.p.commands[i].type == "L") {
-        beginShape(TRIANGLE_STRIP);
-          vertex(this.p.commands[i - 1].x, this.p.commands[i - 1].y, 0);
-          vertex(this.p.commands[i - 1].x, this.p.commands[i - 1].y, this.dAct);
-
-          vertex(this.p.commands[i].x, this.p.commands[i].y, 0);
-          vertex(this.p.commands[i].x, this.p.commands[i].y, this.dAct);
-        endShape();
-      }
-      
-      if (this.p.commands[i].type == "Q") {
-        beginShape(TRIANGLE_STRIP);
-          for(var r = 0; r < res; r++){
-            var thisT = r/(res - 1);
-            var thisX = quadLerp(this.p.commands[i - 1].x, this.p.commands[i].x1, this.p.commands[i].x, thisT);
-            var thisY = quadLerp(this.p.commands[i - 1].y, this.p.commands[i].y1, this.p.commands[i].y, thisT);
-
-            vertex(thisX, thisY, 0);
-            vertex(thisX, thisY, this.dAct);
-          }
-        endShape();
-      }
-
-      if (this.p.commands[i].type == "C") {
-        beginShape(TRIANGLE_STRIP);
-          for(var r = 0; r < res; r++){
-            var thisT = r/(res - 1);
-            var thisX = bezierPoint(this.p.commands[i - 1].x, this.p.commands[i].x1, this.p.commands[i].x2, this.p.commands[i].x, thisT);
-            var thisY = bezierPoint(this.p.commands[i - 1].y, this.p.commands[i].y1, this.p.commands[i].y2, this.p.commands[i].y, thisT);
-
-            vertex(thisX, thisY, 0);
-            vertex(thisX, thisY, this.dAct);
-          }
-        endShape();
-      }
-      
     }
   }
   
@@ -397,13 +424,17 @@ class TumbleLet {
       noFill();
       stroke(strokeColor);
       strokeWeight(strokeW);
-
-      for (i = 0; i < this.p.commands.length; i++) {
-        if(this.p.commands[i].type != "Z"){
-          line(
-            this.p.commands[i].x, this.p.commands[i].y, 0,
-            this.p.commands[i].x, this.p.commands[i].y, this.dAct
-          );
+      const segs = this.getExtrudeSegments();
+      for(let si = 0; si < segs.length; si++){
+        const z0 = segs[si].z0;
+        const z1 = segs[si].z1;
+        for (i = 0; i < this.p.commands.length; i++) {
+          if(this.p.commands[i].type != "Z"){
+            line(
+              this.p.commands[i].x, this.p.commands[i].y, z0,
+              this.p.commands[i].x, this.p.commands[i].y, z1
+            );
+          }
         }
       }
     pop();
