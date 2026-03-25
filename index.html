@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>STG _v.Boost (local)</title>
+
+    <link rel="stylesheet" href="css/style.css" />
+
+    <!-- 原版有一段 google fonts css2，这里仅用于 UI 的 IBM Plex Mono -->
+    <link rel="preconnect" href="https://fonts.gstatic.com/" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- 原版内联 @font-face：保持一致，字体文件需放到 boost_resources/ -->
+    <style>
+      @font-face {
+        font-family: Milligram-Medium;
+        src: url(boost_resources/Milligram-Medium.ttf);
+      }
+      @font-face {
+        font-family: GT-America-Extended-Black-Trial;
+        src: url(boost_resources/GT-America-Extended-Black-Trial.otf);
+      }
+      @font-face {
+        font-family: GT-Alpina-Condensed-Light-Trial;
+        src: url(boost_resources/GT-Alpina-Condensed-Light-Trial.otf);
+      }
+      @font-face {
+        font-family: Milligram-Condensed-Bold;
+        src: url(boost_resources/Milligram-Condensed-Bold.ttf);
+      }
+      @font-face {
+        font-family: Ko_Banzeen-SlantedL;
+        src: url(boost_resources/Ko_Banzeen-SlantedL.otf);
+      }
+      @font-face {
+        font-family: ZafranArabic-Black;
+        src: url(boost_resources/ZafranArabic-Black.otf);
+      }
+      @font-face {
+        font-family: FormulaCondensed-Black;
+        src: url(boost_resources/FormulaCondensed-Black.otf);
+      }
+      @font-face {
+        font-family: NeueWorld-CondensedRegular;
+        src: url(boost_resources/NeueWorld-CondensedRegular.ttf);
+      }
+      @font-face {
+        font-family: InstrumentSerif-Italic;
+        src: url(boost_resources/InstrumentSerif-Italic.ttf);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="widget" style="display: block">
+      <div class="dropdown">
+        <button class="dropbtn">Select...</button>
+        <div class="dropdown-content">
+          <a href="https://spacetypegenerator.com/" target="_blank" rel="noreferrer"
+            >CYLINDER</a
+          >
+          <a
+            href="https://spacetypegenerator.com/boost"
+            target="_blank"
+            rel="noreferrer"
+            >BOOST</a
+          >
+        </div>
+      </div>
+
+      <div id="generatorInput">
+        <div class="titleh2">
+          <h2>STG v.Boost</h2>
+          <p>
+            a kinetic generator from
+            <a href="https://www.instagram.com/kiel.d.m/" target="_blank" rel="noreferrer"
+              >kielm</a
+            >
+          </p>
+          <div class="popup" onclick="myFunction()">
+            Readme and Support!
+            <span class="popuptext" id="myPopup">
+              Boost 1.1.0
+              <br />
+              <br />Fonts / png 需要你补齐到 <code>boost_resources/</code>（见该目录 README）。
+            </span>
+          </div>
+        </div>
+
+        <button type="button" class="collapsible active"><h1>Text</h1></button>
+        <div class="content" style="display: block">
+          <div class="module">
+            <textarea id="textArea" rows="4" oninput="setText()"></textarea>
+
+            <select name="fontChange" id="fontChange" onchange="setFont(this.value)">
+              <option value="0" selected="selected">Milligram - Medium</option>
+              <option value="1">Bebas Neue</option>
+              <option value="2">Dela Gothic One</option>
+              <option value="3">Times New RomanMedium</option>
+              <option value="4">Times New Roman Bold</option>
+            </select>
+
+            <div class="coupling1">
+              <div class="coupling_label"><h3>Align</h3></div>
+              <select name="alignMode" id="alignMode" onchange="setAlignMode(this.value)">
+                <option value="0">Left</option>
+                <option value="1" selected="selected">Center</option>
+                <option value="2">Right</option>
+              </select>
+            </div>
+
+            <div class="coupling1">
+              <div class="coupling_label"><h3>Size</h3></div>
+              <input
+                type="range"
+                class="ranger"
+                min="0"
+                max="100"
+                value="50"
+                id="scaler"
+                oninput="setScaler(this.value)"
+              />
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="collapsible active"><h1>Style</h1></button>
+        <div class="content" style="display: block">
+          <div class="module">
+            <div class="accelModule">
+              <div class="coupling1">
+                <div class="coupling_label"><h3>Bkgd</h3></div>
+                <input
+                  type="color"
+                  id="bkgdColor"
+                  name="bkgdColor"
+                  value="#000000"
+                  oninput="setBkgdColor(this.value)"
+                />
+              </div>
+            </div>
+
+            <div class="accelModule">
+              <h4>Caps</h4>
+              <div class="coupling1">
+                <label class="coupling_label" for="capsOn">Fill</label>
+                <input type="checkbox" id="capsOn" name="capsOn" checked onclick="setCapsOn()" />
+              </div>
+
+              <div id="capsOptions">
+                <div class="coupling1">
+                  <div class="coupling_label"><h3>Color</h3></div>
+                  <input
+                    type="color"
+                    id="textColor"
+                    name="textColor"
+                    value="#ffffff"
+                    oninput="setTextColor(this.value)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="accelModule">
+              <h4>Stroke</h4>
+              <div class="coupling1">
+                <label class="coupling_label" for="strokeOn">Visible</label>
+                <input type="checkbox" id="strokeOn" name="strokeOn" onclick="setStrokeOn()" />
+              </div>
+
+              <div id="strokeOptions">
+                <div class="coupling1">
+                  <div class="coupling_label"><h3>Weight</h3></div>
+                  <input
+                    type="range"
+                    class="ranger"
+                    min="0"
+                    max="100"
+                    value="10"
+                    id="strokeWeight"
+                    oninput="setStrokeWeight(this.value)"
+                  />
+                </div>
+
+                <div class="coupling1">
+                  <div class="coupling_label"><h3>Color</h3></div>
+                  <input
+                    type="color"
+                    id="strokeColor"
+                    name="strokeColor"
+                    value="#000000"
+                    oninput="setStrokeColor(this.value)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="accelModule">
+              <h4>Sides</h4>
+              <select name="sidesType" id="sidesType" onchange="setSidesType(this.value)">
+                <option value="0">Transparent</option>
+                <option value="1">Solid</option>
+                <option value="2" selected="selected">Assorted</option>
+              </select>
+
+              <div id="sidesOptionsTrans"></div>
+              <div id="sidesOptionsSolid">
+                <div class="coupling1">
+                  <input
+                    type="color"
+                    class="fullLengthColor"
+                    id="sideSolidColor"
+                    name="sideSolidColor"
+                    value="#f26666"
+                    oninput="setSideSolidColor(this.value)"
+                  />
+                </div>
+              </div>
+
+              <div id="sidesOptionsRandom">
+                <div id="quintColor">
+                  <div class="coupling1">
+                    <input
+                      type="color"
+                      id="quint0color"
+                      name="quint0color"
+                      value="#ffffff"
+                      oninput="setColorSet(0, this.value)"
+                    />
+                    <input
+                      type="color"
+                      id="quint1color"
+                      name="quint1color"
+                      value="#4e7cd9"
+                      oninput="setColorSet(1, this.value)"
+                    />
+                    <input
+                      type="color"
+                      id="quint2color"
+                      name="quint2color"
+                      value="#02733e"
+                      oninput="setColorSet(2, this.value)"
+                    />
+                    <input
+                      type="color"
+                      id="quint3color"
+                      name="quint3color"
+                      value="#f23030"
+                      oninput="setColorSet(3, this.value)"
+                    />
+                    <input
+                      type="color"
+                      id="quint4color"
+                      name="quint4color"
+                      value="#f26666"
+                      oninput="setColorSet(4, this.value)"
+                    />
+                  </div>
+
+                  <div class="coupling1">
+                    <button type="button" class="randomPalette" onclick="generateRandomPalette()">
+                      RANDOM PALETTE
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="sidesOptionsTexture">
+                <div class="coupling1">
+                  <div class="coupling_label"><h3>Color</h3></div>
+                  <input
+                    type="color"
+                    id="textColor"
+                    name="textColor"
+                    value="#ffffff"
+                    oninput="setTextColor(this.value)"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="collapsible active"><h1>Animation</h1></button>
+        <div class="content" style="display: block">
+          <div class="coupling1">
+            <label class="coupling2_label" for="orbitOn">Orbit Control</label>
+            <input type="checkbox" id="orbitOn" name="orbit" onclick="setOrbitOn()" />
+          </div>
+
+          <div class="coupling1">
+            <label class="coupling2_label" for="mouseCenter">Mouse Center</label>
+            <input type="checkbox" id="mouseCenter" name="mouseCenter" onclick="setMouseCenterOn()" />
+          </div>
+
+          <div class="module">
+            <select name="extrudeType" id="extrudeType" onchange="setExtrudeType(this.value)">
+              <option value="0">Tumble</option>
+              <option value="1" selected="selected">Zoom</option>
+              <option value="2">Punch</option>
+            </select>
+
+            <div id="tumbleSet">
+              <div class="coupling1">
+                <div class="coupling_label"><h3>Extrude</h3></div>
+                <input
+                  type="range"
+                  class="ranger"
+                  min="0"
+                  max="100"
+                  value="50"
+                  id="tumbleDepthLength"
+                  oninput="setTumbleDepthLength(this.value)"
+                />
+              </div>
+
+              <div class="coupling1">
+                <div class="coupling_label"><h3>Amount</h3></div>
+                <input
+                  type="range"
+                  class="ranger"
+                  min="0"
+                  max="100"
+                  value="50"
+                  id="tumbleAmount"
+                  oninput="setTumbleAmount(this.value)"
+                />
+              </div>
+            </div>
+
+            <div id="zoomSet">
+              <div class="coupling1">
+                <div class="coupling_label"><h3>Extrude</h3></div>
+                <input
+                  type="range"
+                  class="ranger"
+                  min="0"
+                  max="100"
+                  value="50"
+                  id="zoomDepthLength"
+                  oninput="setZoomDepthLength(this.value)"
+                />
+              </div>
+            </div>
+
+            <div id="punchSet">
+              <div class="coupling1">
+                <div class="coupling_label"><h3>Extrude</h3></div>
+                <input
+                  type="range"
+                  class="ranger"
+                  min="0"
+                  max="100"
+                  value="25"
+                  id="punchDepthLength"
+                  oninput="setPunchDepthLength(this.value)"
+                />
+              </div>
+
+              <div class="coupling1">
+                <div class="coupling_label"><h3>Distance</h3></div>
+                <input
+                  type="range"
+                  class="ranger"
+                  min="0"
+                  max="100"
+                  value="50"
+                  id="punchDistance"
+                  oninput="setPunchDistance(this.value)"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="collapsible active"><h1>Acceleration</h1></button>
+        <div class="content" style="display: block">
+          <div class="module">
+            <div class="accelModule">
+              <h4>Delay</h4>
+              <div class="coupling1">
+                <div class="coupling_label"><h3>Length</h3></div>
+                <input
+                  type="range"
+                  class="ranger"
+                  min="0"
+                  max="100"
+                  value="20"
+                  id="maxDelay"
+                  oninput="setMaxDelay(this.value)"
+                />
+              </div>
+            </div>
+
+            <div class="accelModule">
+              <h4>INTRO STAGE</h4>
+              <div class="selectPair">
+                <select
+                  name="stageAstrength"
+                  id="stageAstrength"
+                  class="stageSelect"
+                  onchange="setStageAstrength(this.value)"
+                >
+                  <option value="0">Sine</option>
+                  <option value="1">Cubic</option>
+                  <option value="2">Circ</option>
+                  <option value="3" selected="selected">Expo</option>
+                  <option value="4">Back</option>
+                  <option value="5">Bounce</option>
+                  <option value="6">Elastic</option>
+                </select>
+
+                <select
+                  name="stageAdirect"
+                  id="stageAdirect"
+                  class="stageSelect"
+                  onchange="setStageAdirect(this.value)"
+                >
+                  <option value="0">In</option>
+                  <option value="1">Out</option>
+                  <option value="2" selected="selected">In &amp; Out</option>
+                </select>
+              </div>
+
+              <div class="coupling1">
+                <div class="coupling_label"><h3>Length</h3></div>
+                <input
+                  type="range"
+                  class="ranger"
+                  min="0"
+                  max="100"
+                  value="40"
+                  id="stagAlength"
+                  oninput="setStageAlength(this.value)"
+                />
+              </div>
+            </div>
+
+            <div class="accelModule">
+              <h4>PAUSE</h4>
+              <div class="coupling1">
+                <div class="coupling_label"><h3>Length</h3></div>
+                <input
+                  type="range"
+                  class="ranger"
+                  min="0"
+                  max="100"
+                  value="0"
+                  id="pauseLength"
+                  oninput="setPauseLength(this.value)"
+                />
+              </div>
+            </div>
+
+            <div class="accelModule">
+              <h4>OUTRO STAGE</h4>
+              <div class="selectPair">
+                <select name="stageBstrength" class="stageSelect" onchange="setStageBstrength(this.value)">
+                  <option value="0">Sine</option>
+                  <option value="1">Cubic</option>
+                  <option value="2">Circ</option>
+                  <option value="3" selected="selected">Expo</option>
+                  <option value="4">Back</option>
+                  <option value="5">Bounce</option>
+                  <option value="6">Elastic</option>
+                </select>
+
+                <select name="stageBdirect" class="stageSelect" onchange="setStageBdirect(this.value)">
+                  <option value="0">In</option>
+                  <option value="1">Out</option>
+                  <option value="2" selected="selected">In &amp; Out</option>
+                </select>
+              </div>
+
+              <div class="coupling1">
+                <div class="coupling_label"><h3>Length</h3></div>
+                <input
+                  type="range"
+                  class="ranger"
+                  min="0"
+                  max="100"
+                  value="40"
+                  id="stageBlength"
+                  oninput="setStageBlength(this.value)"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="collapsible"><h1>Export</h1></button>
+        <div class="content">
+          <div class="module">
+            <div class="coupling2">
+              <div class="couplingEntry">
+                <input type="radio" id="window" name="saveSize" value="0" onclick="sizeSaveChange(this.value)" checked />
+                <label for="window">Window Size</label>
+              </div>
+              <div class="couplingEntry">
+                <input type="radio" id="vert" name="saveSize" value="1" onclick="sizeSaveChange(this.value)" />
+                <label for="vert">Vertical, 9:16</label>
+              </div>
+              <div class="couplingEntry">
+                <input type="radio" id="squa" name="saveSize" value="2" onclick="sizeSaveChange(this.value)" />
+                <label for="squa">Square, 1:1</label>
+              </div>
+            </div>
+
+            <div class="coupling1">
+              <button type="button" class="saveJPGbutton" onclick="runJPGsave()">SAVE JPG</button>
+            </div>
+            <div class="coupling1">
+              <button type="button" class="saveMP4button" onclick="runSave()">RECORD MP4</button>
+            </div>
+            <div class="coupling1">
+              <div id="recStatus">
+                <p>
+                  RECORDING IN PROCESS <br /><span id="recTicker"></span>/<span id="numFrame"></span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <label class="switch">
+        <input type="checkbox" checked oninput="hideWidget()" />
+        <span class="slider round"></span>
+      </label>
+    </div>
+
+    <script>
+      function myFunction() {
+        var popup = document.getElementById("myPopup");
+        popup.classList.toggle("show");
+      }
+
+      window.pausePop = false;
+      document.getElementById("generatorInput").addEventListener("mouseenter", function () {
+        window.pausePop = true;
+      });
+      document.getElementById("generatorInput").addEventListener("mouseleave", function () {
+        window.pausePop = false;
+      });
+    </script>
+
+    <script>
+      var coll = document.getElementsByClassName("collapsible");
+      var i;
+      for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function () {
+          this.classList.toggle("active");
+          var content = this.nextElementSibling;
+          if (content.style.display === "block") {
+            content.style.display = "none";
+          } else {
+            content.style.display = "block";
+          }
+        });
+      }
+    </script>
+
+    <!-- 依赖库：用 CDN，避免把超大 .js 直接塞进仓库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://unpkg.com/h264-mp4-encoder@1.0.12/dist/h264-mp4-encoder.web.js"></script>
+
+    <!-- 原版业务脚本（本地） -->
+    <script src="js/boost/sketch_boost.js"></script>
+    <script src="js/boost/update.js"></script>
+    <script src="js/boost/animators.js"></script>
+    <script src="js/boost/recording.js"></script>
+    <script src="js/boost/class_base.js"></script>
+    <script src="js/boost/class_let.js"></script>
+    <script src="js/boost/class_letArabic.js"></script>
+  </body>
+</html>
