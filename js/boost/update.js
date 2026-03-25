@@ -1,4 +1,5 @@
 function setText(){
+  if(renderMode !== 0) return; // Logo 模式下不重建 TTF 文字
   var enteredText = document.getElementById("textArea").value;
   
   inputText = "";
@@ -70,7 +71,8 @@ function findMaxSize(){
 function setAlignMode(val){
   alignMode = val;
 
-  setText();
+  if(renderMode === 0) setText();
+  else if (typeof buildLogoBase === "function") buildLogoBase();
 }
 
 function createAnimation(){
@@ -80,8 +82,7 @@ function createAnimation(){
 
 function setFont(val){
   selFont = val;
-
-  setText();
+  if(renderMode === 0) setText();
 }
 
 function setScaler(val){
@@ -89,7 +90,8 @@ function setScaler(val){
 
   wWindow = map(scaler, 0, 1, wWindowMin, wWindowMax);
   
-  setText();
+  if(renderMode === 0) setText();
+  else if (typeof buildLogoBase === "function") buildLogoBase();
 }
 
 function setExtrudeType(val){

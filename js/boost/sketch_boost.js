@@ -98,6 +98,18 @@ function preload(){
   tFontFactor[2] = 0.72;
   tFontFactor[3] = 0.72;
   tFontFactor[4] = 0.72;
+
+  // SVG Logo（3 条 path）解析：仅供 SVG 模式使用
+  try {
+    const logoLines = loadStrings("boost_resources/Logo");
+    if (logoLines && logoLines.length) {
+      loadLogoSvg(logoLines.join("\n"));
+    } else {
+      console.warn("boost_resources/Logo is empty or not found.");
+    }
+  } catch (e) {
+    console.warn("Failed to load SVG Logo:", e);
+  }
 }
 
 function setup(){
@@ -137,7 +149,10 @@ function setup(){
   rectMode(CENTER);
 
   document.getElementById("textArea").value = starterText;
-  setText();
+  // 读取 UI 默认模式，避免 renderMode 变量和页面选项不一致
+  const modeEl = document.getElementById("renderModeSelect");
+  renderMode = modeEl ? parseInt(modeEl.value, 10) || 0 : renderMode;
+  setRenderMode(renderMode);
 
   const uiElement = select('#widget'); // replace with your HTML element's ID or class
   uiElement.mouseOver(() => enableOrbit = false);
@@ -213,7 +228,8 @@ function resizeForPreview(){
   wWindowMax = width;
   wWindow = map(scaler, 0, 1, wWindowMin, wWindowMax);
 
-  setText();
+  if (renderMode === 0) setText();
+  else buildLogoBase();
 }
 
 function resizeForSave(){
@@ -229,6 +245,7 @@ function resizeForSave(){
   wWindowMax = width;
   wWindow = map(scaler, 0, 1, wWindowMin, wWindowMax);
 
-  setText();
+  if (renderMode === 0) setText();
+  else buildLogoBase();
 }
 

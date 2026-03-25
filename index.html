@@ -94,6 +94,14 @@
         <button type="button" class="collapsible active"><h1>Text</h1></button>
         <div class="content" style="display: block">
           <div class="module">
+            <div class="coupling1">
+              <div class="coupling_label"><h3>Mode</h3></div>
+              <select name="renderMode" id="renderModeSelect" onchange="setRenderMode(this.value)">
+                <option value="0" selected="selected">TTF 文字</option>
+                <option value="1">Logo SVG</option>
+              </select>
+            </div>
+
             <textarea id="textArea" rows="4" oninput="setText()"></textarea>
 
             <select name="fontChange" id="fontChange" onchange="setFont(this.value)">
@@ -124,6 +132,36 @@
                 id="scaler"
                 oninput="setScaler(this.value)"
               />
+            </div>
+
+            <div id="logoKerningUI" style="display: none">
+              <div class="coupling1">
+                <div class="coupling_label"><h3>Kerning</h3></div>
+                <input
+                  type="range"
+                  class="ranger"
+                  min="-200"
+                  max="200"
+                  value="0"
+                  id="logoKerningRange"
+                  oninput="setLogoKerning(this.value)"
+                />
+              </div>
+              <div class="coupling1">
+                <div class="coupling_label"><h3>C1</h3></div>
+                <input type="color" value="#FD0000" oninput="setLogoFillColor(0,this.value)" />
+              </div>
+              <div class="coupling1">
+                <div class="coupling_label"><h3>C2</h3></div>
+                <input type="color" value="#0061DF" oninput="setLogoFillColor(1,this.value)" />
+              </div>
+              <div class="coupling1">
+                <div class="coupling_label"><h3>C3</h3></div>
+                <input type="color" value="#F5BC37" oninput="setLogoFillColor(2,this.value)" />
+              </div>
+              <div id="logoStatus" style="color:#ffcc00;font-family:'IBM Plex Mono',monospace;font-size:10px;margin-left:5px;margin-top:3px;display:none">
+                Logo SVG 状态
+              </div>
             </div>
           </div>
         </div>
@@ -574,6 +612,7 @@
     <script src="https://unpkg.com/h264-mp4-encoder@1.0.12/dist/h264-mp4-encoder.web.js"></script>
 
     <!-- 原版业务脚本（本地） -->
+    <script src="js/boost/svg_mode.js"></script>
     <script src="js/boost/sketch_boost.js"></script>
     <script src="js/boost/update.js"></script>
     <script src="js/boost/animators.js"></script>
